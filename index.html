@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifikasi Key + Panel Menu VVIP</title>
+<style>
+  * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 20px;
+  }
+
+  .container {
+    background: #ffffff;
+    padding: 30px 25px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    position: relative;
+  }
+
+  h2 {
+    margin-top: 0;
+    color: #1e3c72;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    border-color: #2a5298;
+  }
+
+  .btn-verify {
+    width: 100%;
+    padding: 12px;
+    background: #2a5298;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .btn-verify:hover {
+    background: #1e3c72;
+  }
+
+  #hasil {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 14px;
+    min-height: 20px;
+  }
+
+  .benar { color: #1a9c4a; }
+  .salah { color: #d93025; }
+
+  /* ==== PANEL MENU ==== */
+  #panelMenu {
+    display: none;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px dashed #ccc;
+    text-align: left;
+    animation: fadeIn 0.5s ease;
+  }
+
+  #panelMenu h3 {
+    text-align: center;
+    color: #1e3c72;
+    margin: 0 0 15px;
+    font-size: 16px;
+  }
+
+  .kategori {
+    margin-bottom: 15px;
+  }
+
+  .kategori-judul {
+    font-size: 12px;
+    font-weight: bold;
+    color: #2a5298;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-left: 3px solid #2a5298;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: #f4f6fb;
+    border-radius: 10px;
+    font-weight: bold;
+    color: #333;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    border: 1px solid #e0e4ee;
+    position: relative;
+  }
+
+  .menu-item span {
+    flex: 1;
+    text-align: left;
+  }
+
+  /* Locked VVIP item */
+  .menu-item.locked {
+    background: #fff8e1;
+    border: 1px dashed #d4af37;
+    cursor: pointer;
+  }
+
+  .menu-item.locked span::after {
+    content: " 🔒";
+    font-size: 12px;
+  }
+
+  /* ==== GARIS PEMBATAS VVIP ==== */
+  .garis-vvip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 25px 0 15px;
+  }
+
+  .garis-vvip::before,
+  .garis-vvip::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  }
+
+  .garis-vvip span {
+    font-size: 13px;
+    font-weight: bold;
+    color: #b8860b;
+    letter-spacing: 2px;
+    text-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+    white-space: nowrap;
+  }
+
+  .vvip-box {
+    background: linear-gradient(135deg, #fffbe6, #fff4c2);
+    border: 2px solid #d4af37;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+  }
+
+  .vvip-box .kategori-judul {
+    color: #b8860b;
+    border-left-color: #d4af37;
+  }
+
+  .vvip-box .menu-item {
+    background: #ffffff;
+    border: 1px solid #f0e0a0;
+    color: #5a4500;
+  }
+
+  .vvip-box input:checked + .slider {
+    background-color: #d4af37;
+  }
+
+  /* ==== TOGGLE SWITCH ==== */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 26px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  input:checked + .slider {
+    background-color: #1a9c4a;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+
+  /* ==== ICON DANA (pojok kiri atas) ==== */
+  .dana-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #118eea;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(17,142,234,0.5);
+    transition: transform 0.2s;
+  }
+
+  .dana-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .dana-icon {
+    width: 16px;
+    height: 16px;
+    background: white;
+    color: #118eea;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ==== MODAL / POPUP ==== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-box {
+    background: white;
+    border-radius: 14px;
+    padding: 25px 22px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-box h3 {
+    margin: 0 0 5px;
+    color: #b8860b;
+    font-size: 18px;
+  }
+
+  .modal-box .harga {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1e3c72;
+    margin-bottom: 15px;
+  }
+
+  .modal-box p.desc {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+
+  .btn-buy {
+    width: 100%;
+    padding: 12px;
+    background: #118eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: background 0.3s;
+  }
+
+  .btn-buy:hover {
+    background: #0d6fbb;
+  }
+
+  .btn-cancel {
+    width: 100%;
+    padding: 10px;
+    background: #eee;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .btn-cancel:hover {
+    background: #ddd;
+  }
+
+  /* ==== SLIDER GESER (drag to confirm) ==== */
+  .slider-container {
+    position: relative;
+    width: 100%;
+    height: 54px;
+    background: #e8eefc;
+    border-radius: 30px;
+    margin: 15px 0;
+    overflow: hidden;
+    user-select: none;
+    border: 2px solid #118eea;
+  }
+
+  .slider-track-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #118eea;
+    letter-spacing: 1px;
+    pointer-events: none;
+  }
+
+  .slider-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 46px;
+    height: 46px;
+    background: #118eea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(17,142,234,0.6);
+    transition: left 0.05s linear;
+    z-index: 2;
+  }
+
+  .slider-thumb:active {
+    cursor: grabbing;
+  }
+
+  .slider-thumb.done {
+    background: #1a9c4a;
+    box-shadow: 0 2px 8px rgba(26,156,74,0.6);
+  }
+
+  /* ==== NOTIF ==== */
+  .notif {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a9c4a;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .notif.show {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- NOTIF BERHASIL -->
+  <div class="notif" id="notif">✅ Berhasil! Selamat Menikmati 🎉</div>
+
+  <div class="container">
+    <!-- ICON DANA POJOK KIRI ATAS -->
+    <button class="dana-btn" id="danaBtn" title="VVIP">
+      <span class="dana-icon">D</span> VVIP
+    </button>
+
+    <h2>🔐 Masukkan Key</h2>
+    <input type="text" id="keyInput" placeholder="Masukkan key di sini...">
+    <button class="btn-verify" onclick="verifikasiKey()">Verifikasi Key</button>
+    <p id="hasil"></p>
+
+    <div id="panelMenu">
+      <h3>⚙️ Panel Menu</h3>
+
+      <!-- ===== NON-VVIP ===== -->
+      <div class="kategori">
+        <div class="kategori-judul">🎯 Aim</div>
+
+        <div class="menu-item">
+          <span>BODY</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleBody">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="menu-item">
+          <span>HEADSHOT</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleHeadshot">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="menu-item">
+          <span>AIMBOT 70%</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleAimbot70">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="kategori">
+        <div class="kategori-judul">👁️ ESP</div>
+
+        <div class="menu-item">
+          <span>ESP ON ALL</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleEspAll">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="menu-item">
+          <span>ESP LINE</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleEspLine">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="menu-item">
+          <span>ESP BOX</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleEspBox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="menu-item">
+          <span>ESP HEALTH</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleEspHealth">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="menu-item">
+          <span>ESP MOCO SAVE</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleEspMoco">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ===== GARIS VVIP ===== -->
+      <div class="garis-vvip">
+        <span>👑 KHUSUS VVIP 👑</span>
+      </div>
+
+      <!-- ===== VVIP (LOCKED) ===== -->
+      <div class="vvip-box">
+        <div class="kategori" style="margin-bottom:0;">
+          <div class="kategori-judul">⚡ VVIP Aim</div>
+
+          <div class="menu-item locked" id="vvipItem" onclick="bukaVVIP()">
+            <span>AIMBOT 100%</span>
+            <label class="switch" onclick="event.stopPropagation();">
+              <input type="checkbox" id="toggleAimbot100" disabled>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MODAL 1: INFO VVIP ===== -->
+  <div class="modal-overlay" id="modalVVIP">
+    <div class="modal-box">
+      <h3>👑 VVIP ACCESS</h3>
+      <div class="harga">Rp 190.000</div>
+      <p class="desc">
+        Buka fitur <b>AIMBOT 100%</b> eksklusif VVIP.<br>
+        Bayar sekali, nikmati selamanya 😎
+      </p>
+      <button class="btn-buy" onclick="bukaPembayaran()">💳 Buy Sekarang</button>
+      <button class="btn-cancel" onclick="tutupModal('modalVVIP')">Batal</button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL 2: PEMBAYARAN (SLIDER GESER) ===== -->
+  <div class="modal-overlay" id="modalBayar">
+    <div class="modal-box">
+      <h3>💳 Pembayaran VVIP</h3>
+      <div class="harga">Rp 190.000</div>
+      <p class="desc">Geser tombol di bawah untuk konfirmasi pembayaran</p>
+
+      <div class="slider-container" id="sliderContainer">
+        <div class="slider-track-text">GESER UNTUK BAYAR →</div>
+        <div class="slider-thumb" id="sliderThumb">→</div>
+      </div>
+
+      <button class="btn-cancel" onclick="tutupModal('modalBayar')">Batal</button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL 3: MASUKIN PASSWORD ===== -->
+  <div class="modal-overlay" id="modalPassword">
+    <div class="modal-box">
+      <h3>🔑 Masukkan Password</h3>
+      <p class="desc">Masukkan password pembayaran untuk konfirmasi</p>
+      <input type="password" id="passwordInput" placeholder="Masukkan password...">
+      <button class="btn-buy" onclick="cekPassword()">Konfirmasi</button>
+      <button class="btn-cancel" onclick="tutupModal('modalPassword')">Batal</button>
+      <p id="passError" style="color:#d93025; font-size:12px; margin-top:8px; min-height:16px;"></p>
+    </div>
+  </div>
+
+  <script>
+    const KEY_BENAR = "PROXY-12345";
+    const PASS_BENAR = "190k";
+    let vvipUnlocked = false;
+
+    /* ===== Verifikasi Key ===== */
+    function verifikasiKey() {
+      const input = document.getElementById("keyInput").value.trim();
+      const hasil = document.getElementById("hasil");
+      const panel = document.getElementById("panelMenu");
+
+      if (input === KEY_BENAR) {
+        hasil.textContent = "✅ Key BENAR! Akses diberikan.";
+        hasil.className = "benar";
+        panel.style.display = "block";
+      } else {
+        hasil.textContent = "❌ Key SALAH! Coba lagi.";
+        hasil.className = "salah";
+        panel.style.display = "none";
+      }
+    }
+
+    document.getElementById("keyInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") verifikasiKey();
+    });
+
+    /* ===== Log semua toggle non-VVIP ===== */
+    document.querySelectorAll(".switch input:not(#toggleAimbot100)").forEach(function(toggle) {
+      toggle.addEventListener("change", function() {
+        const nama = this.id.replace("toggle", "").toUpperCase();
+        console.log(nama + ": " + (this.checked ? "ON ✅" : "OFF ❌"));
+      });
+    });
+
+    /* ===== VVIP Logic ===== */
+    function bukaVVIP() {
+      if (vvipUnlocked) return; // udah kebuka, bebas
+      document.getElementById("modalVVIP").classList.add("active");
+    }
+
+    // Klik icon DANA pojok kiri atas
+    document.getElementById("danaBtn").addEventListener("click", function() {
+      if (vvipUnlocked) {
+        tampilNotif("👑 VVIP sudah aktif, bro!");
+      } else {
+        document.getElementById("modalVVIP").classList.add("active");
+      }
+    });
+
+    function tutupModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    function bukaPembayaran() {
+      tutupModal("modalVVIP");
+      document.getElementById("modalBayar").classList.add("active");
+      resetSlider();
+    }
+
+    /* ===== SLIDER GESER ===== */
+    const thumb = document.getElementById("sliderThumb");
+    const track = document.getElementById("sliderContainer");
+    let isDragging = false;
+    let sliderDone = false;
+
+    function resetSlider() {
+      sliderDone = false;
+      thumb.style.left = "3px";
+      thumb.classList.remove("done");
+      thumb.textContent = "→";
+    }
+
+    thumb.addEventListener("mousedown", startDrag);
+    thumb.addEventListener("touchstart", startDrag, { passive: true });
+
+    function startDrag(e) {
+      if (sliderDone) return;
+      isDragging = true;
+      e.preventDefault();
+    }
+
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("touchmove", drag, { passive: false });
+
+    function drag(e) {
+      if (!isDragging || sliderDone) return;
+      e.preventDefault();
+
+      const rect = track.getBoundingClientRect();
+      let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      let x = clientX - rect.left - 23; // 23 = setengah thumb
+
+      const maxX = rect.width - 52; // 46 thumb + 3+3 padding
+      if (x < 3) x = 3;
+      if (x > maxX) x = maxX;
+
+      thumb.style.left = x + "px";
+
+      // Kalau udah nyampe ujung kanan
+      if (x >= maxX - 2) {
+        sliderDone = true;
+        isDragging = false;
+        thumb.style.left = maxX + "px";
+        thumb.classList.add("done");
+        thumb.textContent = "✓";
+
+        // Lanjut ke modal password
+        setTimeout(function() {
+          tutupModal("modalBayar");
+          document.getElementById("modalPassword").classList.add("active");
+          document.getElementById("passwordInput").value = "";
+          document.getElementById("passError").textContent = "";
+        }, 400);
+      }
+    }
+
+    document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchend", endDrag);
+
+    function endDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      if (!sliderDone) resetSlider();
+    }
+
+    /* ===== CEK PASSWORD ===== */
+    function cekPassword() {
+      const pass = document.getElementById("passwordInput").value.trim();
+      const err = document.getElementById("passError");
+
+      if (pass === PASS_BENAR) {
+        tutupModal("modalPassword");
+        vvipUnlocked = true;
+
+        // Unlock toggle VVIP
+        const toggle = document.getElementById("toggleAimbot100");
+        toggle.disabled = false;
+
+        // Update tampilan item VVIP
+        const item = document.getElementById("vvipItem");
+        item.classList.remove("locked");
+        item.onclick = null; // ga perlu bayar lagi
+        item.querySelector("span").textContent = "AIMBOT 100%";
+
+        // Notif berhasil
+        tampilNotif("✅ Berhasil! Selamat Menikmati 🎉");
+
+        // Reset slider untuk next time (kalau perlu)
+        resetSlider();
+      } else {
+        err.textContent = "❌ Password salah! Coba lagi.";
+      }
+    }
+
+    document.getElementById("passwordInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") cekPassword();
+    });
+
+    /* ===== NOTIF ===== */
+    function tampilNotif(teks) {
+      const notif = document.getElementById("notif");
+      notif.textContent = teks;
+      notif.classList.add("show");
+      setTimeout(function() {
+        notif.classList.remove("show");
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>
